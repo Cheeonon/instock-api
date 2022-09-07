@@ -17,4 +17,11 @@ router.get ("/:warehouseid", (req, res) => {
     res.send(foundWarehouse)
 })
 
+router.delete ("/:warehouseid", (req, res) => {
+    warehouseId = req.params.warehouseid
+    const newWarehouses = warehouse.filter(house => warehouseId !== house.id)
+    fs.writeFileSync("./data/warehouses.json", JSON.stringify(newWarehouses))
+    res.send("deleted successfully")
+})
+
 module.exports = router;
