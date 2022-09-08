@@ -24,5 +24,13 @@ router.get("/:inventoryId", (req,res)=>{
 
 })
 
+router.delete ("/:inventoryid", (req, res) => {
+    inventoryId = req.params.inventoryid
+    const inventoryDetails = readInventory()
+    const newInventory = inventoryDetails.filter(deet => inventoryId !== deet.id)
+    fs.writeFileSync("./data/inventories.json", JSON.stringify(newInventory))
+    res.send("deleted successfully")
+})
+
 
 module.exports = router;
