@@ -32,5 +32,4 @@ router.delete ("/:inventoryid", (req, res) => {
     res.send("deleted successfully")
 })
 
-
 module.exports = router;
