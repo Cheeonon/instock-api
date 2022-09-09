@@ -57,12 +57,19 @@ router.post("/add", (req, res) => {
     quantity: req.body.quantity,
   };
 
-  if (newItem.warehouseName && newItem.itemName && newItem.description && newItem.category && newItem.status && newItem.quantity >= 0) {
-    const inventoryDetails = readInventory();
-    inventoryDetails.push(newItem);
+  if (
+    editedItem.warehouseName 
+    && editedItem.itemName 
+    && editedItem.description 
+    && editedItem.category 
+    && editedItem.quantity >= 0 
+    && ( editedItem.status === "In Stock" || editedItem.status === "Out of Stock")
+    ) {
+        const inventoryDetails = readInventory();
+        inventoryDetails.push(newItem);
 
-    fs.writeFileSync("./data/inventories.json",JSON.stringify(inventoryDetails));
-    res.status(201).send(JSON.stringify(newItem));
+        fs.writeFileSync("./data/inventories.json",JSON.stringify(inventoryDetails));
+        res.status(201).send(JSON.stringify(newItem));
   } else {
     res.status(400).send({ message: `ERROR BAD REQUEST` });
   }
@@ -81,14 +88,21 @@ router.put("/:inventoryId/edit", (req, res)=> {
         quantity: req.body.quantity,
     };
 
-    if (editedItem.warehouseName && editedItem.itemName && editedItem.description && editedItem.category && editedItem.status && editedItem.quantity >= 0) {
-        const inventoryDetails = readInventory();
+    if (
+        editedItem.warehouseName 
+        && editedItem.itemName 
+        && editedItem.description 
+        && editedItem.category 
+        && editedItem.quantity >= 0 
+        && ( editedItem.status === "In Stock" || editedItem.status === "Out of Stock")
+        ) {
+            const inventoryDetails = readInventory();
+            
+            let index = inventoryDetails.findIndex(item => item.id === req.params.inventoryId);
+            inventoryDetails[index] = editedItem;
         
-        let index = inventoryDetails.findIndex(item => item.id === req.params.inventoryId);
-        inventoryDetails[index] = editedItem;
-    
-        fs.writeFileSync("./data/inventories.json", JSON.stringify(inventoryDetails));
-        res.status(201).send(JSON.stringify(editedItem));
+            fs.writeFileSync("./data/inventories.json", JSON.stringify(inventoryDetails));
+            res.status(201).send(JSON.stringify(editedItem));
     } else {
         res.status(400).send({ message: `ERROR BAD REQUEST` });
     }
