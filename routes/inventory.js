@@ -2,14 +2,17 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const crypto = require("crypto");
-const inventory = require("../data/inventories.json");
+const inventory = "./data/inventories.json";
 const warehouse = require("../data/warehouses.json");
+const { json } = require("express");
 
-function readInventory() {
-  const inventoryFile = fs.readFileSync("./data/inventories.json");
-  const inventoryData = JSON.parse(inventoryFile);
-  return inventoryData;
+function readInventory(inventory) {
+  return JSON.parse(fs.readFileSync(inventory))
 }
+
+router.get("/", (req, res) => {
+  res.send(readInventory(inventory));
+});
 
 function findWarehouseId(warehouseName) {
     const warehouseFile = fs.readFileSync("./data/warehouses.json");
@@ -21,12 +24,8 @@ function findWarehouseId(warehouseName) {
     return warehouseObj.id;
   }
 
-router.get("/", (req, res) => {
-  res.send(JSON.stringify(inventory));
-});
-
 router.get("/:inventoryId", (req, res) => {
-  const inventoryDetails = readInventory();
+  const inventoryDetails = readInventory(inventory);
 
   const inventoryDetail = inventoryDetails.find((inventory) => {
     return inventory.id === req.params.inventoryId;
@@ -37,7 +36,7 @@ router.get("/:inventoryId", (req, res) => {
 
 router.delete("/:inventoryid", (req, res) => {
   inventoryId = req.params.inventoryid;
-  const inventoryDetails = readInventory();
+  const inventoryDetails = readInventory(inventory);
   const newInventory = inventoryDetails.filter(
     (deet) => inventoryId !== deet.id
   );
@@ -57,15 +56,18 @@ router.post("/add", (req, res) => {
     quantity: req.body.quantity,
   };
 
+  console.log(newItem);
+
   if (
-    editedItem.warehouseName 
-    && editedItem.itemName 
-    && editedItem.description 
-    && editedItem.category 
-    && editedItem.quantity >= 0 
-    && ( editedItem.status === "In Stock" || editedItem.status === "Out of Stock")
+    newItem.warehouseName 
+    && newItem.itemName 
+    && newItem.description 
+    && newItem.category 
+    && newItem.quantity >= 0 
+    && ( newItem.status === "In Stock" || newItem.status === "Out of Stock")
     ) {
-        const inventoryDetails = readInventory();
+
+        const inventoryDetails = readInventory(inventory);
         inventoryDetails.push(newItem);
 
         fs.writeFileSync("./data/inventories.json",JSON.stringify(inventoryDetails));
@@ -76,7 +78,7 @@ router.post("/add", (req, res) => {
 });
 
 router.put("/:inventoryId/edit", (req, res)=> {
-
+    console.log(req.params)
     const editedItem = {
         id: req.params.inventoryId,
         warehouseID: findWarehouseId(req.body.warehouseName),
@@ -96,12 +98,18 @@ router.put("/:inventoryId/edit", (req, res)=> {
         && editedItem.quantity >= 0 
         && ( editedItem.status === "In Stock" || editedItem.status === "Out of Stock")
         ) {
-            const inventoryDetails = readInventory();
+            let inventoryDetails = readInventory(inventory);
             
-            let index = inventoryDetails.findIndex(item => item.id === req.params.inventoryId);
+            let index = inventoryDetails.findIndex((item) => {
+                if (item.id === req.params.inventoryId){
+                    return item;
+                }
+            })
+
             inventoryDetails[index] = editedItem;
+            // console.log(inventoryDetails)
         
-            fs.writeFileSync("./data/inventories.json", JSON.stringify(inventoryDetails));
+            fs.writeFileSync("./data/inventories.json",JSON.stringify(inventoryDetails));
             res.status(201).send(JSON.stringify(editedItem));
     } else {
         res.status(400).send({ message: `ERROR BAD REQUEST` });
