@@ -9,7 +9,6 @@ const readFile = (data)=>{
 
 router.get("/", (req,res)=>{
     res.send(readFile(warehouse))
-    console.log(readFile(warehouse))
    
 })
 
