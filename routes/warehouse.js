@@ -2,15 +2,20 @@ const { randomUUID } = require('crypto');
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
-const warehouse = require('../data/warehouses.json')
+const warehouse = './data/warehouses.json'
+const readFile = (data)=>{
+   return JSON.parse(fs.readFileSync(data))
+}
 
 router.get("/", (req,res)=>{
-    res.send(JSON.stringify(warehouse))
+    res.send(readFile(warehouse))
+    console.log(readFile(warehouse))
+   
 })
 
 router.get ("/:warehouseid", (req, res) => {
     warehouseId = req.params.warehouseid
-    const foundWarehouse = warehouse.find((house)=>{
+    const foundWarehouse = readFile(warehouse).find((house)=>{
         if (house.id === warehouseId) {
             return house
         }
@@ -20,7 +25,7 @@ router.get ("/:warehouseid", (req, res) => {
 
 router.delete ("/:warehouseid", (req, res) => {
     warehouseId = req.params.warehouseid
-    const newWarehouses = warehouse.filter(house => warehouseId !== house.id)
+    const newWarehouses = readFile(warehouse).filter(house => warehouseId !== house.id)
     fs.writeFileSync("./data/warehouses.json", JSON.stringify(newWarehouses))
     res.send("deleted successfully")
 })
@@ -40,12 +45,9 @@ router.post("/add", (req, res) => {
           "email": req.body.email
         }
       }
-
-      console.log(warehouse);
       const warehouseList = fs.readFileSync("./data/warehouses.json");
       const warehouseListData = JSON.parse(warehouseList);
       warehouseListData.push(warehouse)
-      console.log(warehouseListData)
       fs.writeFileSync("./data/warehouses.json", JSON.stringify(warehouseListData));
 
       res.status(201).send(JSON.stringify(warehouse))
