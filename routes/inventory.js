@@ -127,7 +127,6 @@ router.put("/:inventoryId/edit", (req, res) => {
             });
 
             inventoryDetails[index] = editedItem;
-            // console.log(inventoryDetails)
 
             fs.writeFileSync(
                 "./data/inventories.json",
