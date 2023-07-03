@@ -8,6 +8,7 @@ const warehouseRoutes = require("./routes/warehouse.js")
 
 const PORT = process.env.PORT;
 
+
 app.use(cors());
 app.use(express.json());
 
